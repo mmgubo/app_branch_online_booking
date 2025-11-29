@@ -1,7 +1,6 @@
 package com.mfuras.booking.bookings;
 
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-@Repository
-public interface BookingsRepository {
+public interface BookingsRepository extends JpaRepository<Bookings, Integer> {
 }
