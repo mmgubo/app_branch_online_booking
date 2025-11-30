@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/book
+    url: jdbc:postgresql://localhost:5432/bookings
     username: mfuras
     password: mfuras
     driver-class-name: org.postgresql.Driver
@@ -22,5 +22,5 @@ server:
 application:
   config:
     customer-url: http://localhost:8222/api/v1/customers
-    branch-url: http://localhost:8222/api/v1/branch
+    branch-url: http://localhost:8222/api/v1/branches
     product-url: http://localhost:8222/api/v1/products

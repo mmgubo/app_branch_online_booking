@@ -2,6 +2,8 @@ package com.mfuras.booking.bookings;
 
 import com.mfuras.booking.bookingsline.BookingLineRequest;
 import com.mfuras.booking.bookingsline.BookingsLineService;
+import com.mfuras.booking.branch.BranchClient;
+import com.mfuras.booking.branch.BranchRequest;
 import com.mfuras.booking.customer.CustomerClient;
 import com.mfuras.booking.exception.BusinessException;
 import com.mfuras.booking.kafka.BookingsConfirmation;
@@ -26,6 +28,7 @@ public class BookingsService {
     private final BookingsMapper mapper;
     private final BookingsLineService bookingsLineService;
     private final BookingsProducer bookingsProducer;
+    private final BranchClient branchClient;
 
     public Integer createBooking(@Valid BookingsRequest request) {
         //check the customer --> OpenFeign
@@ -47,7 +50,13 @@ public class BookingsService {
             );
         }
 
-        // todo start branch process
+        // branch process
+        var branchRequest = new BranchRequest(
+                bookings.getId(),
+                bookings.getReference(),
+                customer
+        );
+        branchClient.requestBookingBranch(branchRequest);
 
         //send the booking confirmation --> notification-ms (kafka)
         bookingsProducer.sendBookingsConfirmation(
