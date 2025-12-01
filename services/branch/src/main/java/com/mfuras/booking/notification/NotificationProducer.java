@@ -20,7 +20,7 @@ public class NotificationProducer {
         log.info("Sending notification with body = < {} >", request);
         Message<BranchNotificationRequest> message = MessageBuilder
                 .withPayload(request)
-                .setHeader(TOPIC, "payment-topic")
+                .setHeader(TOPIC, "branch-topic")
                 .build();
 
         kafkaTemplate.send(message);
