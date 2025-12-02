@@ -13,11 +13,11 @@ spring:
       bootstrap-servers: localhost:9092
       group-id: branchGroup, bookingsGroup
       auto-offset-reset: earliest
-      key-deserializer: org.apache.kafka.common.serialization.StringSerializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonSerializer
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring.json.trusted.packages: "*"
-        spring.json.type.mapping: bookingsConfirmation:com.mfuras.booking.kafka.BookingsConfirmation, branchConfirmation:com.mfuras.booking.notification.BranchNotificationRequest
+        spring.json.type.mapping: bookingsConfirmation:com.mfuras.booking.kafka.bookings.BookingsConfirmation, branchConfirmation:com.mfuras.booking.kafka.branch.BranchConfirmation
   mail:
     host: localhost
     port: 1025
