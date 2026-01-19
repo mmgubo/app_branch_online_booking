@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 public record BookingsResponse(
         Integer id,
         String reference,
-        BookingsMethod bookingsMethod,
         String customerId
 ) {
 }

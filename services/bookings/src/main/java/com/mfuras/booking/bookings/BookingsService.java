@@ -1,15 +1,9 @@
 package com.mfuras.booking.bookings;
 
-import com.mfuras.booking.bookingsline.BookingLineRequest;
-import com.mfuras.booking.bookingsline.BookingsLineService;
 import com.mfuras.booking.branch.BranchClient;
 import com.mfuras.booking.branch.BranchRequest;
 import com.mfuras.booking.customer.CustomerClient;
 import com.mfuras.booking.exception.BusinessException;
-import com.mfuras.booking.kafka.BookingsConfirmation;
-import com.mfuras.booking.kafka.BookingsProducer;
-import com.mfuras.booking.product.ProductClient;
-import com.mfuras.booking.product.SelectedProductRequest;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,10 +18,7 @@ public class BookingsService {
 
     private final BookingsRepository repository;
     private final CustomerClient customerClient;
-    private final ProductClient productClient;
     private final BookingsMapper mapper;
-    private final BookingsLineService bookingsLineService;
-    private final BookingsProducer bookingsProducer;
     private final BranchClient branchClient;
 
     public Integer createBooking(@Valid BookingsRequest request) {
@@ -35,38 +26,16 @@ public class BookingsService {
         var customer = this.customerClient.findCustomerById(request.customerId())
                 .orElseThrow(() -> new BusinessException("Cannot create booking:: No customer exist with the provided ID:: " + request.customerId()));
 
-        var selectedProducts = this.productClient.selectedProducts(request.products());
 
         var bookings = this.repository.save(mapper.toBookings(request));
 
-        for (SelectedProductRequest bookingsRequest : request.products()){
-            bookingsLineService.saveBookingLine(
-                    new BookingLineRequest(
-                            null,
-                            bookings.getId(),
-                            bookingsRequest.productId()
-
-                    )
-            );
-        }
-
         // branch process
-        var branchRequest = new BranchRequest(
-                bookings.getId(),
-                bookings.getReference(),
-                customer
-        );
-        branchClient.requestBookingBranch(branchRequest);
+//        var branchRequest = new BranchRequest(
+//                bookings.getId(),
+//                bookings.getReference()
+//        );
+//        branchClient.requestBookingBranch(branchRequest);
 
-        //send the booking confirmation --> notification-ms (kafka)
-        bookingsProducer.sendBookingsConfirmation(
-                new BookingsConfirmation(
-                        request.reference(),
-                        request.bookingsMethod(),
-                        customer,
-                        selectedProducts
-                )
-        );
         return bookings.getId();
     }
 

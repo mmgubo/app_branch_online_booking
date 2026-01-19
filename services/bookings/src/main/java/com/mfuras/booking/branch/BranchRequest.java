@@ -4,7 +4,6 @@ import com.mfuras.booking.customer.CustomerResponse;
 
 public record BranchRequest(
         Integer bookingsId,
-        String bookingReference,
-        CustomerResponse customer
+        String bookingReference
 ) {
 }

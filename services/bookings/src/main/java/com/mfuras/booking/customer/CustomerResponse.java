@@ -2,8 +2,7 @@ package com.mfuras.booking.customer;
 
 public record CustomerResponse(
         String id,
-        String firstname,
-        String lastname,
+        String name,
         String email
 ) {
 }

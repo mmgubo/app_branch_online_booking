@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin(value = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/v1/customers")
 @RequiredArgsConstructor
@@ -14,14 +15,14 @@ public class CustomerController {
 
     private  final CustomerService service;
 
-    @PostMapping
+    @PostMapping("/registerCustomer")
     public ResponseEntity<String> createCustomer(
             @RequestBody @Valid CustomerRequest request
     ){
         return  ResponseEntity.ok(service.createCustomer(request));
     }
 
-    @PutMapping
+    @PutMapping("/updateCustomer")
     public ResponseEntity<Void> updateCustomer(
             @RequestBody @Valid CustomerRequest request
     ){
@@ -29,7 +30,7 @@ public class CustomerController {
         return ResponseEntity.accepted().build();
     }
 
-    @GetMapping
+    @GetMapping("/getAllCustomers")
     public ResponseEntity<List<CustomerResponse>> findAll(){
         return ResponseEntity.ok(service.findAllCustomers());
 
@@ -42,7 +43,7 @@ public class CustomerController {
         return ResponseEntity.ok(service.existingById(customerId));
     }
 
-    @GetMapping("/{customer-id}")
+    @GetMapping("getCustomer/{customer-id}")
     public ResponseEntity<CustomerResponse> findById(
             @PathVariable ("customer-id") String customerId
     ) {

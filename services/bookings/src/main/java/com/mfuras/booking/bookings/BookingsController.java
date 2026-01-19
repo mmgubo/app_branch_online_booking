@@ -15,14 +15,14 @@ public class BookingsController {
 
     private final BookingsService service;
 
-    @PostMapping
+    @PostMapping("/createBooking")
     public ResponseEntity<Integer>createBooking(
             @RequestBody @Valid BookingsRequest request
     ){
         return ResponseEntity.ok(service.createBooking(request));
     }
 
-    @GetMapping
+    @GetMapping("/findAllBookings")
     public ResponseEntity<List<BookingsResponse>> findAll(){
         return ResponseEntity.ok(service.findAll());
     }

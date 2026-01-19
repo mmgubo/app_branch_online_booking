@@ -10,7 +10,6 @@ public class BookingsMapper {
                 .id(request.id())
                 .customerId(request.customerId())
                 .reference(request.reference())
-                .bookingMethod(request.bookingsMethod())
                 .build();
     }
 
@@ -18,7 +17,6 @@ public class BookingsMapper {
         return new BookingsResponse(
                 bookings.getId(),
                 bookings.getReference(),
-                bookings.getBookingMethod(),
                 bookings.getCustomerId()
         );
     }

@@ -1,6 +1,5 @@
 package com.mfuras.booking.email;
 
-import com.mfuras.booking.kafka.bookings.Product;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +12,6 @@ import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import org.thymeleaf.context.Context;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static com.mfuras.booking.email.EmailTemplates.BOOKINGS_CONFIRMATION;
@@ -65,8 +63,7 @@ public class EmailService {
     public void sendBookingConfirmation(
             String destinationEmail,
             String customerName,
-            String bookingsReference,
-            List<Product> products
+            String bookingsReference
     ) throws MessagingException {
         MimeMessage mimeMessage = mailSender.createMimeMessage();
         MimeMessageHelper messageHelper =
@@ -77,7 +74,6 @@ public class EmailService {
         Map<String, Object> variables = new HashMap<>();
         variables.put("customerName", customerName);
         variables.put("bookingsReference", bookingsReference);
-        variables.put("products", products);
 
         Context context = new Context();
         context.setVariables(variables);

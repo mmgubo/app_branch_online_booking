@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @FeignClient(
-        name= "product-service",
+        name= "branch-service",
         url = "${application.config.branch-url}"
 )
 public interface BranchClient {

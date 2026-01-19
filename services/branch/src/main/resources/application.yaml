@@ -3,3 +3,15 @@ spring:
     import: optional:configserver:http://localhost:8888
   application:
     name: branch-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/branch
+    username: mfuras
+    password: mfuras
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+server:
+  port: 8060

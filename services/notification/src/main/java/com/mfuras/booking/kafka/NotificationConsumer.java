@@ -62,8 +62,7 @@ public class NotificationConsumer {
         emailService.sendBookingConfirmation(
                 bookingsConfirmation.customer().email(),
                 customerName,
-                bookingsConfirmation.bookingsReference(),
-                bookingsConfirmation.products()
+                bookingsConfirmation.bookingsReference()
         );
     }
 }

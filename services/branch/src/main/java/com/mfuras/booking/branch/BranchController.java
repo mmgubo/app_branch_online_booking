@@ -17,7 +17,7 @@ public class BranchController {
 
     private final BranchService service;
 
-    @PostMapping
+    @PostMapping("/createBranch")
     public ResponseEntity<Integer> createBranch(
             @RequestBody @Valid BranchRequest request
     ){

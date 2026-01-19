@@ -1,9 +1,0 @@
-package com.mfuras.booking.bookings;
-
-public enum BookingsMethod {
-    PHONE_CALL,
-    BRANCH_VISIT,
-    ONLINE_FORMS,
-    WEBSITE,
-    APP
-}
