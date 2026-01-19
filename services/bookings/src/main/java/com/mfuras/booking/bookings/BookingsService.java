@@ -23,18 +23,17 @@ public class BookingsService {
 
     public Integer createBooking(@Valid BookingsRequest request) {
         //check the customer --> OpenFeign
-        var customer = this.customerClient.findCustomerById(request.customerId())
-                .orElseThrow(() -> new BusinessException("Cannot create booking:: No customer exist with the provided ID:: " + request.customerId()));
-
+        var customer = this.customerClient.findCustomerById(request.customerId());
 
         var bookings = this.repository.save(mapper.toBookings(request));
 
         // branch process
-//        var branchRequest = new BranchRequest(
-//                bookings.getId(),
-//                bookings.getReference()
-//        );
-//        branchClient.requestBookingBranch(branchRequest);
+        var branchRequest = new BranchRequest(
+                bookings.getId(),
+                bookings.getReference(),
+                customer.getBody()
+        );
+        branchClient.requestBookingBranch(branchRequest);
 
         return bookings.getId();
     }
