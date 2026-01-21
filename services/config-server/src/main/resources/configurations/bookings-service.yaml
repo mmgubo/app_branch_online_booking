@@ -21,6 +21,5 @@ server:
 
 application:
   config:
-    customer-url: http://localhost:8222/api/v1/customers
-    branch-url: http://localhost:8222/api/v1/branches
-    product-url: http://localhost:8222/api/v1/products
+    customer-url: http://localhost:8090/api/v1/customers
+    branch-url: http://localhost:8060/api/v1/branches

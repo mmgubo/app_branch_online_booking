@@ -1,4 +1,4 @@
-package com.mfuras.booking.kafka.bookings;
+package com.mfuras.booking.kafka.booking;
 
 public record Customer(
         String id,

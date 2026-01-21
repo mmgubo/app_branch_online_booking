@@ -1,7 +1,7 @@
 package com.mfuras.booking.kafka;
 
 import com.mfuras.booking.email.EmailService;
-import com.mfuras.booking.kafka.bookings.BookingsConfirmation;
+import com.mfuras.booking.kafka.booking.BookingConfirmation;
 import com.mfuras.booking.kafka.branch.BranchConfirmation;
 import com.mfuras.booking.notification.Notification;
 import com.mfuras.booking.notification.NotificationRepository;
@@ -37,7 +37,7 @@ public class NotificationConsumer {
         );
 
         //send email to the clients for branch confirmation
-        var customerName = branchConfirmation.customerFirstname() + " " + branchConfirmation.customerLastname();
+        var customerName = branchConfirmation.customerName();
         emailService.sendBranchConfirmation(
                 branchConfirmation.customerEmail(),
                 customerName,
@@ -46,23 +46,23 @@ public class NotificationConsumer {
 
     }
 
-    @KafkaListener(topics = "bookings-topic")
-    public void consumeBookingsConfirmationNotification(BookingsConfirmation bookingsConfirmation) throws MessagingException {
-        log.info(format("Consuming the message from bookings-topic Topic:: %s", bookingsConfirmation));
+    @KafkaListener(topics = "book-topic")
+    public void consumeBookingConfirmationNotification(BookingConfirmation bookingConfirmation) throws MessagingException {
+        log.info(format("Consuming the message from bookings-topic Topic:: %s", bookingConfirmation));
         repository.save(
                 Notification.builder()
                         .type(BOOKING_CONFIRMATION)
                         .notificationDate(LocalDateTime.now())
-                        .bookingsConfirmation(bookingsConfirmation)
+                        .bookingConfirmation(bookingConfirmation)
                         .build()
         );
 
         //send email to the clients for booking confirmation
-        var customerName = bookingsConfirmation.customer().firstname() + " " + bookingsConfirmation.customer().lastname();
+        var customerName = bookingConfirmation.customer().name();
         emailService.sendBookingConfirmation(
-                bookingsConfirmation.customer().email(),
+                bookingConfirmation.customer().email(),
                 customerName,
-                bookingsConfirmation.bookingsReference()
+                bookingConfirmation.bookingsReference()
         );
     }
 }

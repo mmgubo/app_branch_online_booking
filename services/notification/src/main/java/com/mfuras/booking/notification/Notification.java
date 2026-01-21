@@ -1,7 +1,7 @@
 package com.mfuras.booking.notification;
 
 
-import com.mfuras.booking.kafka.bookings.BookingsConfirmation;
+import com.mfuras.booking.kafka.booking.BookingConfirmation;
 import com.mfuras.booking.kafka.branch.BranchConfirmation;
 import lombok.*;
 import org.springframework.data.annotation.Id;
@@ -22,6 +22,6 @@ public class Notification {
     private NotificationType type;
     private LocalDateTime notificationDate;
     private BranchConfirmation branchConfirmation;
-    private BookingsConfirmation bookingsConfirmation;
+    private BookingConfirmation bookingConfirmation;
 
 }

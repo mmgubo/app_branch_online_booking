@@ -1,6 +1,6 @@
-package com.mfuras.booking.kafka.branch;
+package com.mfuras.booking.notification;
 
-public record BranchConfirmation(
+public record BranchNotificationRequest(
         String bookingsReference,
         String customerName,
         String customerEmail

@@ -6,16 +6,16 @@ spring:
           enabled: true
       routes:
         - id: customer-service
-          uri: lb:http://customer-service
+          uri: lb:http://CUSTOMER-SERVICE
           predicates:
               - Path=/api/v1/customers/**
         - id: bookings-service
-          uri: lb:http://bookings-service
+          uri: lb:http://BOOKINGS-SERVICE/
           predicates:
             - Path=/api/v1/bookings/**
-        - id: product-service
-          uri: lb:http://product-service
+        - id: branch-service
+          uri: lb:http://BRANCH-SERVICE
           predicates:
-            - Path=/api/v1/products/**
+            - Path=/api/v1/branch/**
 server:
   port: 8222

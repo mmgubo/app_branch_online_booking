@@ -4,6 +4,8 @@ import com.mfuras.booking.branch.BranchClient;
 import com.mfuras.booking.branch.BranchRequest;
 import com.mfuras.booking.customer.CustomerClient;
 import com.mfuras.booking.exception.BusinessException;
+import com.mfuras.booking.kafka.BookConfirmation;
+import com.mfuras.booking.kafka.BookProducer;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,7 @@ public class BookingsService {
     private final CustomerClient customerClient;
     private final BookingsMapper mapper;
     private final BranchClient branchClient;
+    private final BookProducer bookProducer;
 
     public Integer createBooking(@Valid BookingsRequest request) {
         //check the customer --> OpenFeign
@@ -34,6 +37,13 @@ public class BookingsService {
                 customer.getBody()
         );
         branchClient.requestBookingBranch(branchRequest);
+
+        bookProducer.sendBookConfirmation(
+                new BookConfirmation(
+                        request.reference(),
+                        customer.getBody()
+                )
+        );
 
         return bookings.getId();
     }

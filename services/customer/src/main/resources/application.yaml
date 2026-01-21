@@ -3,16 +3,3 @@ spring:
     import: optional:configserver:http://localhost:8888
   application:
     name: customer-service
-  data:
-    mongodb:
-      username: mfuras
-      password: mfuras
-      host: localhost
-      port: 27017
-      database: customer
-      authentication-database: admin
-  cloud:
-    config:
-      enabled: false
-server:
-  port: 8090
