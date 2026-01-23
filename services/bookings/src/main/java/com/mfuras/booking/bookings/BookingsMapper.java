@@ -22,7 +22,13 @@ public class BookingsMapper {
         return new BookingsResponse(
                 bookings.getId(),
                 bookings.getService(),
-                bookings.getCustomerId()
+                bookings.getCustomerId(),
+                bookings.getBranch(),
+                bookings.getDate(),
+                bookings.getTime(),
+                bookings.getStatus(),
+                bookings.getNotes()
+
         );
     }
 }
