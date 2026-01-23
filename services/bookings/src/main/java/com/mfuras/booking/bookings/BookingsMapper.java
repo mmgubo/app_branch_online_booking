@@ -11,6 +11,9 @@ public class BookingsMapper {
                 .customerId(request.customerId())
                 .service(request.service())
                 .branch(request.branch())
+                .status(request.status())
+                .time(request.time())
+                .date(request.date())
                 .notes(request.notes())
                 .build();
     }

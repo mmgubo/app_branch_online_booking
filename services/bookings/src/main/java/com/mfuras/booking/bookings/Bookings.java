@@ -41,7 +41,4 @@ public class Bookings {
     @Column(updatable = false, nullable = false)
     private LocalDateTime createdDate;
 
-    @LastModifiedDate
-    @Column(insertable = false)
-    private LocalDateTime lastModifiedDate;
 }
