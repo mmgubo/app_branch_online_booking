@@ -7,6 +7,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @AllArgsConstructor
 @Builder
@@ -22,9 +23,19 @@ public class Bookings {
     private Integer id;
 
     @Column(unique = true,  nullable = false)
-    private String reference;
+    private String service;
 
     private String customerId;
+
+    private String date;
+
+    private String time;
+
+    private String status;
+
+    private String branch;
+
+    private String notes;
 
     @CreatedDate
     @Column(updatable = false, nullable = false)

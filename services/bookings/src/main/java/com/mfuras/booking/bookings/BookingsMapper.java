@@ -9,14 +9,16 @@ public class BookingsMapper {
         return Bookings.builder()
                 .id(request.id())
                 .customerId(request.customerId())
-                .reference(request.reference())
+                .service(request.service())
+                .branch(request.branch())
+                .notes(request.notes())
                 .build();
     }
 
     public BookingsResponse fromBooking(Bookings bookings) {
         return new BookingsResponse(
                 bookings.getId(),
-                bookings.getReference(),
+                bookings.getService(),
                 bookings.getCustomerId()
         );
     }

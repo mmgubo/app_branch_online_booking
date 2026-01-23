@@ -33,14 +33,14 @@ public class BookingsService {
         // branch process
         var branchRequest = new BranchRequest(
                 bookings.getId(),
-                bookings.getReference(),
+                bookings.getService(),
                 customer.getBody()
         );
         branchClient.requestBookingBranch(branchRequest);
 
         bookProducer.sendBookConfirmation(
                 new BookConfirmation(
-                        request.reference(),
+                        request.service(),
                         customer.getBody()
                 )
         );
