@@ -1,5 +1,6 @@
 package com.mfuras.booking.branch;
 
+import com.mfuras.booking.customer.CustomerResponse;
 import com.mfuras.booking.exception.BusinessException;
 import org.springframework.http.HttpHeaders;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
+import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -39,5 +41,10 @@ public class BranchClient {
             throw new BusinessException("An error occurred while processing branch details" + response.getStatusCode());
         }
         return response;
+    }
+    public void deleteBookingBranch(Integer bookingsId) {
+        restTemplate.delete(
+                branchUrl + "/deleteBooking/" + bookingsId);
+
     }
 }

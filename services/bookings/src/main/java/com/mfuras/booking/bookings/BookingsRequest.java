@@ -12,11 +12,7 @@ import java.util.TimeZone;
 public record BookingsRequest(
         Integer id,
         String service,
-        @NotNull(message = "Customer id should be present")
-        @NotEmpty(message = "Customer id should not be empty")
-        @NotBlank(message = "Customer id should not be blank")
         String customerId,
-        @NotBlank(message = "Date should not be blank")
         String date,
         String time,
         String status,

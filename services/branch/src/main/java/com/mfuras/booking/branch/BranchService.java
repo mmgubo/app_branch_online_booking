@@ -29,4 +29,9 @@ public class BranchService {
 
         return branch.getId();
     }
+
+    public void deleteBranch(Integer bookingsId) {
+
+        repository.deleteById(bookingsId);
+    }
 }

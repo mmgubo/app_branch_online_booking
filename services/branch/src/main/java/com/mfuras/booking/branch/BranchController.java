@@ -4,10 +4,7 @@ package com.mfuras.booking.branch;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/branches")
@@ -22,5 +19,13 @@ public class BranchController {
             @RequestBody @Valid BranchRequest request
     ){
         return ResponseEntity.ok(service.createBranch(request));
+    }
+
+    @DeleteMapping("/deleteBooking/{bookings-id}")
+    public ResponseEntity<Void> deleteBranch(
+            @PathVariable ("bookings-id") Integer bookingsId
+    ){
+        service.deleteBranch(bookingsId);
+        return ResponseEntity.accepted().build();
     }
 }

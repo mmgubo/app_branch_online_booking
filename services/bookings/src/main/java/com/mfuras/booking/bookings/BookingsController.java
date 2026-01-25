@@ -34,4 +34,31 @@ public class BookingsController {
     ){
         return ResponseEntity.ok(service.findById(bookingsId));
     }
+
+    @PutMapping("/updateBooking/{bookings-id}")
+    public ResponseEntity<Void> updateBooking(
+            @PathVariable ("bookings-id") Integer bookingsId,
+            @RequestBody @Valid BookingsRequest request
+    ){
+        service.updateBooking(bookingsId, request);
+        return ResponseEntity.accepted().build();
+    }
+
+    @PatchMapping("/updateBookingStatus/{bookings-id}")
+    public ResponseEntity<Void> updateBookingStatus(
+            @PathVariable ("bookings-id") Integer bookingsId,
+            @RequestBody @Valid BookingsRequest request
+    ){
+        service.patchBookingStatus(bookingsId, request);
+        return ResponseEntity.accepted().build();
+    }
+
+    @DeleteMapping("/deleteBooking/{bookings-id}")
+    public ResponseEntity<Void> deleteBooking(
+            @PathVariable ("bookings-id") Integer bookingsId
+
+    ){
+        service.deleteBooking(bookingsId);
+        return ResponseEntity.accepted().build();
+    }
 }
