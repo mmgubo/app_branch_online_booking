@@ -1,14 +1,20 @@
 ## Overview
 A Spring Boot microservice for managing appointment data and profiles in the Online Booking System.
 
-This online booking service handles all branch appointment-related operations including:
+This online booking service handles all branch-appointment-related operations, including:
 - **Customer registration and profile management**
 - **Retrieving customer information**
 - **Updating customer details**
-- **Appointment creation, updating and deleting**
-- **Branch creation and deletion**
-- **Notification communication**
+- **Creating, updating and deleting the Appointments to branch**
+- **Notifying branch about the newly created appointment**
+- **Sending Booking confirmations to the clients via emails**
 ## Architecture
+### These services are using Eureka server for registering and deregistering the services on Eureka for the visibility of the port number the service is running on.
+### These services are not registering to the Eureka server if the services are running as docker containers. 
+### NOTE: Please run the services one by one from the terminal by pointing to the service directory and using Maven commands to run them. 
+### Start running the config-server first and after that run the discovery service.
+### You can run any other service after config-server and discovery services are up and running locally.
+### The development tools used by these services are running well as Docker containers, and the docker configurations are saved in a docker-compose.yml file
 ## Tech Stack
 - **Framework:** Spring Boot 4.x
 - **Language:** Java 21
@@ -21,6 +27,7 @@ This online booking service handles all branch appointment-related operations in
 - Maven 3.9
 - PostgreSQL 14+
 - Docker
+- kafka 2.13
 
 ## Getting Started
 ### 1. Clone the Repository
@@ -31,7 +38,7 @@ This online booking service handles all branch appointment-related operations in
     mvn clean install
 ### Run the application
     mvn spring-boot:run
-## Configuration
+## Configurations/Running the services as docker containers
 - cd **project directory**
 - docker build -t **service name** .
 - docker run -d -p **port number**:**port number** --name **service name** **service name**
@@ -64,10 +71,17 @@ GET /api/v1/exist/{customer-id}
 DELETE /api/v1/{customer-id}
 ```
 
+### For Booking service:**
+- **Create Booking**
+- **Get All Bookings**
+- **Get Booking by ID**
+- **Update Booking**
+- **Update Booking status**
+- **Delete Booking**
+### For Branch service:**
+- **Create Branch**
+- **Delete Branch**
 
-- **For Booking service:**
-- **For Branch service:**
-- **For Notification service:**
 
 ## Database Schema
 ### Customers Database
@@ -76,5 +90,4 @@ DELETE /api/v1/{customer-id}
 - **customer_bookings table**
 ### Branch Database
 - **branch table**
-### Notification Database
-- **notification table**
+
