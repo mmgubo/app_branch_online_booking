@@ -19,13 +19,15 @@ public class BranchService {
 
     public Integer createBranch(BranchRequest request) {
         var branch = repository.save(mapper.toBranch(request));
-        this.notificationProducer.sendNotification(
+
+        //Exclude sending out notifications in this release
+        /** this.notificationProducer.sendNotification(
                 new BranchNotificationRequest(
                         request.bookingReference(),
                         request.customer().name(),
                         request.customer().email()
                 )
-        );
+        );**/
 
         return branch.getId();
     }

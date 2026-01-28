@@ -9,12 +9,22 @@ This online booking service handles all branch-appointment-related operations, i
 - **Notifying branch about the newly created appointment**
 - **Sending Booking confirmations to the clients via emails**
 ## Architecture
-### These services are using Eureka server for registering and deregistering the services on Eureka for the visibility of the port number the service is running on.
-### These services are not registering to the Eureka server if the services are running as docker containers. 
-### NOTE: Please run the services one by one from the terminal by pointing to the service directory and using Maven commands to run them. 
-### Start running the config-server first and after that run the discovery service.
-### You can run any other service after config-server and discovery services are up and running locally.
-### The development tools used by these services are running well as Docker containers, and the docker configurations are saved in a docker-compose.yml file
+The Online Booking System is a cloud-native, microservices-based platform designed for managing appointments, customers, branches, and notifications. The system follows a domain driven architecture with service bookings, branch, customer and notification operating independently but exchanging information.
+The system also follows a distributed pattern with service discovery, centralized configuration, and API gateway for routing and load balancing.
+
+### 1. Project structure
+
+```
+app_branch_online_booking/
+├── discovery/           # Eureka Server (port 8761)
+├── config-server/       # Spring Cloud Config (port 8222)
+├── gateway/             # API Gateway (port 8000)
+├── bookings/            # Bookings Service (port 8070) - PostgreSQL + Kafka
+├── branch/              # Branch Service (port 8060) - PostgreSQL + Kafka
+├── customer/            # Customer Service (port 8090) - MongoDB
+├── notification/        # Notification Service (port 8040) - MongoDB + Kafka
+└── docker-compose       # Docker configuration 
+```
 ## Tech Stack
 - **Framework:** Spring Boot 4.x
 - **Language:** Java 21
@@ -25,27 +35,39 @@ This online booking service handles all branch-appointment-related operations, i
 ## Prerequisites
 - Java 21
 - Maven 3.9
-- PostgreSQL 14+
+- PostgreSQL 15+
 - Docker
 - kafka 2.13
+- Docker and Docker Compose installed
+- At least 8GB RAM allocated to Docker
 
 ## Getting Started
 ### 1. Clone the Repository
     git clone https://github.com/mmgubo/app_branch_online_booking.git
-### 2. Build and Run
-**Using Maven:**
-### Build the project
-    mvn clean install
-### Run the application
-    mvn spring-boot:run
-## Configurations/Running the services as docker containers
-- cd **project directory**
-- docker build -t **service name** .
-- docker run -d -p **port number**:**port number** --name **service name** **service name**
-- docker compose down
-- docker compose up -d
+### 2. Run the services
+**Using Docker:**
+````
+# Build and start all services
+    docker-compose up --build
+    
+# Or run in detached mode
+    docker-compose up -d --build
+    
+# View logs
+    docker-compose logs -f
+
+# View specific service logs    
+    docker-compose logs -f bookings
+````
+
+**Common Commands:**
+````
+# Stop all services
+docker-compose down
+````
+
 ## API Endpoints
-### For Customer service:**
+### For Customer service:
 - **Get All Customers**
 ```http
 GET /api/v1/getAllCustomers

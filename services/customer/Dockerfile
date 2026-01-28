@@ -1,22 +1,52 @@
-# Build stage
-FROM maven:3.9-eclipse-temurin-21 AS builder
+# Dockerfile for Customer Service
+# Spring Boot 3.5.7 with Java 21
+# Uses: MongoDB
+
+FROM eclipse-temurin:21-jdk-alpine AS builder
 
 WORKDIR /app
 
-COPY pom.xml .
-COPY src ./src
-COPY .mvn ./.mvn
-COPY mvnw ./mvnw
+# Copy Maven wrapper and pom.xml
+COPY .mvn/ .mvn/
+COPY mvnw pom.xml ./
 
-RUN mvn clean package -DskipTests
+# Download dependencies (cached layer)
+RUN ./mvnw dependency:go-offline -B
+
+# Copy source code
+COPY src/ src/
+
+# Build the application
+RUN ./mvnw clean package -DskipTests
 
 # Runtime stage
-FROM eclipse-temurin:21-jre
+FROM eclipse-temurin:21-jre-alpine
 
 WORKDIR /app
 
+# Install curl for health checks
+RUN apk add --no-cache curl
+
+# Add non-root user for security
+RUN addgroup -g 1001 -S appgroup && \
+    adduser -u 1001 -S appuser -G appgroup
+
+# Copy the built JAR
 COPY --from=builder /app/target/*.jar app.jar
 
+# Change ownership
+RUN chown -R appuser:appgroup /app
+
+USER appuser
+
+# Expose port
 EXPOSE 8090
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Health check using curl
+HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=5 \
+    CMD curl -f http://localhost:8090/actuator/health || exit 1
+
+# JVM options for containers
+ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -Djava.security.egd=file:/dev/./urandom"
+
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]

@@ -1,17 +1,100 @@
+# =====================================================
+# DOCKER COMPOSE FOR ONLINE BOOKING MICROSERVICES
+# =====================================================
+# Project: app_branch_online_booking
+# Services: Discovery, Config-Server, Gateway, Bookings, Branch, Customer, Notification
+# Databases: PostgreSQL (bookings, branch), MongoDB (customer, notification)
+# Message Broker: Kafka
+# =====================================================
+
 services:
+  # =====================================================
+  # INFRASTRUCTURE SERVICES
+  # =====================================================
+
+  # Zookeeper for Kafka
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    networks:
+      - booking-network
+    healthcheck:
+      test: [ "CMD", "nc", "-z", "localhost", "2181" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Kafka Message Broker
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    networks:
+      - booking-network
+    healthcheck:
+      test: [ "CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  # PostgreSQL Database (for bookings and branch services)
   postgres:
-    container_name: ms_pg_sql
-    image: postgres
+    image: postgres:15-alpine
+    container_name: booking-postgres
     environment:
       POSTGRES_USER: mfuras
       POSTGRES_PASSWORD: mfuras
-      PGDATA: /var/lib/postgresql/data
-    volumes:
-      - postgres:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts/postgres:/docker-entrypoint-initdb.d
     networks:
-      - microservices-net
+      - booking-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # MongoDB (for customer and notification services)
+  mongodb:
+    image: mongo:7.0
+    container_name: booking-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - ./init-scripts/mongo:/docker-entrypoint-initdb.d
+    networks:
+      - booking-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: unless-stopped
 
   pgadmin:
@@ -26,25 +109,16 @@ services:
     ports:
       - "5050:80"
     networks:
-      - microservices-net
+      - booking-network
     restart: unless-stopped
+
   zipkin:
     container_name: zipkin
     image: openzipkin/zipkin
     ports:
       - "9411:9411"
     networks:
-      - microservices-net
-  mongodb:
-    container_name: ms_mongo_db
-    image: mongo
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo:/data
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: mfuras
-      MONGO_INITDB_ROOT_PASSWORD: mfuras
+      - booking-network
 
   mongo-express:
     container_name: ms_mongo_express
@@ -56,35 +130,6 @@ services:
       - ME_CONFIG_MONGODB_ADMINUSERNAME=mfuras
       - ME_CONFIG_MONGODB_ADMINPASSWORD=mfuras
       - ME_CONFIG_MONGODB_SERVER=mongodb
-  zookeeper:
-    image: confluentinc/cp-zookeeper:latest
-    container_name: zookeeper
-    environment:
-      ZOOKEEPER_SERVER_ID: 1
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-    ports:
-      - 22181:22181
-    networks:
-      - microservices-net
-
-  kafka:
-    container_name: ms_kafka
-    image: confluentinc/cp-kafka:7.5.0
-    ports:
-      - 9092:9092
-    depends_on:
-      - zookeeper
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://ms_kafka:29092,PLAINTEXT_HOST://localhost:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-    networks:
-      - microservices-net
-    restart: unless-stopped
 
   mail-dev:
     container_name: ms_mail_dev
@@ -93,14 +138,238 @@ services:
       - "1080:1080"
       - "1025:1025"
 
-networks:
-  microservices-net:
-    driver: bridge
+  # =====================================================
+  # SPRING CLOUD INFRASTRUCTURE
+  # =====================================================
+  # Config Server
+  config-server:
+    build:
+      context: ./services/config-server
+      dockerfile: Dockerfile
+    container_name: config-server
+    ports:
+      - "8888:8888"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - booking-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+    restart: unless-stopped
 
+  # Eureka Discovery Service
+  discovery:
+    build:
+      context: ./services/discovery
+      dockerfile: Dockerfile
+    container_name: discovery-service
+    ports:
+      - "8761:8761"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      EUREKA_INSTANCE_HOSTNAME: discovery
+      EUREKA_CLIENT_REGISTER_WITH_EUREKA: "false"
+      EUREKA_CLIENT_FETCH_REGISTRY: "false"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery:8761/eureka/
+    networks:
+      - booking-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    restart: unless-stopped
+
+  # API Gateway
+  gateway:
+    build:
+      context: ./services/gateway
+      dockerfile: Dockerfile
+    container_name: gateway-service
+    ports:
+      - "8222:8222"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery:8761/eureka/
+    depends_on:
+      discovery:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+    networks:
+      - booking-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8222/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped
+
+  # =====================================================
+  # APPLICATION SERVICES
+  # =====================================================
+
+  # Bookings Service (PostgreSQL + Kafka)
+  bookings:
+    build:
+      context: ./services/bookings
+      dockerfile: Dockerfile
+    container_name: bookings-service
+    ports:
+      - "8070:8070"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_APPLICATION_NAME: bookings
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/bookings
+      SPRING_DATASOURCE_USERNAME: mfuras
+      SPRING_DATASOURCE_PASSWORD: mfuras
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery:8761/eureka/
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      discovery:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+    networks:
+      - booking-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8070/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+    restart: unless-stopped
+
+  # Branch Service (PostgreSQL + Kafka)
+  branch:
+    build:
+      context: ./services/branch
+      dockerfile: Dockerfile
+    container_name: branch-service
+    ports:
+      - "8060:8060"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_APPLICATION_NAME: branch
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/branch
+      SPRING_DATASOURCE_USERNAME: mfuras
+      SPRING_DATASOURCE_PASSWORD: mfuras
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery:8761/eureka/
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      discovery:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+    networks:
+      - booking-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8060/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+    restart: unless-stopped
+
+  # Customer Service (MongoDB)
+  customer:
+    build:
+      context: ./services/customer
+      dockerfile: Dockerfile
+    container_name: customer-service
+    ports:
+      - "8090:8090"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_APPLICATION_NAME: customer
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888
+      SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/customer_db
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery:8761/eureka/
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      discovery:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+    networks:
+      - booking-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8090/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+    restart: unless-stopped
+
+  # Notification Service (MongoDB + Kafka)
+  notification:
+    build:
+      context: ./services/notification
+      dockerfile: Dockerfile
+    container_name: notification-service
+    ports:
+      - "8040:8040"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_APPLICATION_NAME: notification
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888
+      SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/notification_db
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
+      SPRING_MAIL_PORT: ${MAIL_PORT:-587}
+      SPRING_MAIL_USERNAME: ${MAIL_USERNAME:-}
+      SPRING_MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery:8761/eureka/
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      discovery:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+    networks:
+      - booking-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8040/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+    restart: unless-stopped
+
+# =====================================================
+# NETWORKS
+# =====================================================
+networks:
+  booking-network:
+    driver: bridge
+# =====================================================
+# VOLUMES
+# =====================================================
 volumes:
-  postgres:
+  postgres_data:
   pgadmin:
-  mongo:
+  mongodb_data:
 
 
 

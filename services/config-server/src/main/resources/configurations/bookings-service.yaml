@@ -1,17 +1,17 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/bookings
+    url: jdbc:postgresql://postgres:5432/bookings
     username: mfuras
     password: mfuras
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: validate
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
   kafka:
     producer:
-      bootstrap-servers: localhost:9092
+      bootstrap-servers: kafka:9092
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
@@ -21,5 +21,5 @@ server:
 
 application:
   config:
-    customer-url: http://localhost:8090/api/v1/customers
-    branch-url: http://localhost:8060/api/v1/branches
+    customer-url: http://customer:8090/api/v1/customers
+    branch-url: http://branch:8060/api/v1/branches

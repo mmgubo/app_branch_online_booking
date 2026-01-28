@@ -1,0 +1,29 @@
+server:
+  port: 8888
+
+spring:
+  application:
+    name: config-server
+  cloud:
+    config:
+      server:
+        native:
+          search-locations: classpath:/configurations
+        git:
+          uri: https://github.com/mmgubo/app_branch_online_booking.git/
+          default-label: main
+          clone-on-start: true
+
+management:
+  endpoints:
+    health:
+      probes:
+        enabled: true
+    web:
+      exposure:
+        include: health,info
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true

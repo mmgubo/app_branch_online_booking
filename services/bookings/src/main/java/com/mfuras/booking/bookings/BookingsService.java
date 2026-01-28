@@ -42,12 +42,13 @@ public class BookingsService {
         );
         branchClient.requestBookingBranch(branchRequest);
 
-        bookProducer.sendBookConfirmation(
+        //Exclude sending out notifications in this release
+        /*bookProducer.sendBookConfirmation(
                 new BookConfirmation(
                         request.service(),
                         customer.getBody()
                 )
-        );
+        );*/
 
         return bookings.getId();
     }
