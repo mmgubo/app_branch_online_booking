@@ -2,15 +2,14 @@
 A Spring Boot microservice for managing appointment data and profiles in the Online Booking System.
 
 This online booking service handles all branch-appointment-related operations, including:
-- **Customer registration and profile management**
+- **Customer registration**
 - **Retrieving customer information**
 - **Updating customer details**
 - **Creating, updating and deleting the Appointments to branch**
 - **Notifying branch about the newly created appointment**
 - **Sending Booking confirmations to the clients via emails**
 ## Architecture
-The Online Booking System is a cloud-native, microservices-based platform designed for managing appointments, customers, branches, and notifications. The system follows a domain driven architecture with service bookings, branch, customer and notification operating independently but exchanging information.
-The system also follows a distributed pattern with service discovery, centralized configuration, and API gateway for routing and load balancing.
+The Online Booking System is a cloud-based platform built using microservices to manage appointments, customers, branches, and notifications. Each part of the system runs as its own service, focusing on a specific area of the business, while still sharing information with the others when needed.
 
 ### 1. Project structure
 
@@ -93,14 +92,14 @@ GET /api/v1/exist/{customer-id}
 DELETE /api/v1/{customer-id}
 ```
 
-### For Booking service:**
+### For Booking service:
 - **Create Booking**
 - **Get All Bookings**
 - **Get Booking by ID**
 - **Update Booking**
 - **Update Booking status**
 - **Delete Booking**
-### For Branch service:**
+### For Branch service:
 - **Create Branch**
 - **Delete Branch**
 
