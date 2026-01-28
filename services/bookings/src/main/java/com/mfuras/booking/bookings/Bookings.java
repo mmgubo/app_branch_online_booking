@@ -22,7 +22,6 @@ public class Bookings {
     @GeneratedValue
     private Integer id;
 
-    @Column(unique = true,  nullable = false)
     private String service;
 
     private String customerId;
